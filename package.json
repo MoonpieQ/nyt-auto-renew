@@ -13,9 +13,10 @@
   "keywords": [
     "nyt"
   ],
+  "type": "module",
   "author": "jasonqu",
   "license": "ISC",
   "dependencies": {
-    "puppeteer": "^22.14.0"
+    "playwright": "^1.45.3"
   }
 }
