@@ -51,10 +51,11 @@ async function runAutomation(userName, pwd, giftCode) {
       await continueButton.click();
       console.log('Clicked on Continue button');
     } else {
-      console.log('Continue button not found');
+       throw new Error('Did not find continue button');
     }
 
     console.log('Automation completed successfully');
+
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
