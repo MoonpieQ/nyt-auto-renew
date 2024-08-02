@@ -10,7 +10,10 @@ RUN npm install
 RUN npx playwright install-deps chromium
 
 # Copy script
-COPY script.js .
+COPY index.js .
 
-# Run the script
-CMD ["node", "script.js"]
+# Set the entrypoint to the Node.js executable
+ENTRYPOINT ["node", "index.js"]
+
+# Default parameters
+CMD ["email", "pwd", "code"]
