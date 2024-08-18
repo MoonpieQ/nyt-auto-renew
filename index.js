@@ -3,10 +3,13 @@ import {setTimeout} from "node:timers/promises";
 
 async function runAutomation(userName, pwd, giftCode) {
   const browser = await chromium.launch({
-    headless: false // Set this to false to see the browser window
+    headless: false, // Set this to false to see the browser window
+    args: ['--disable-features=IsolateOrigins,site-per-process'],
   });
+
   const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 }
+    viewport: { width: 1920, height: 1080 },
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
   });
   const page = await context.newPage();
 
@@ -28,29 +31,36 @@ async function runAutomation(userName, pwd, giftCode) {
 
     // Step 6: Click Log In
     await page.click('[data-testid="login-button"]');
+    await page.waitForLoadState('networkidle', {navigationTimeout:100000});
+    await page.screenshot({ path: 'login.png' });
+
 
     // Step 7: Open new tab and go to redeem page
-    const newPage = await context.newPage();
-    await newPage.goto(`https://www.nytimes.com/subscription/redeem?campaignId=8WH8J&gift_code=${giftCode}`);
+    // const page = await context.page();
+    // const cookies = await page.context().cookies();
+    // await page.context().addCookies(cookies);
+    await page.goto(`https://www.nytimes.com/subscription/redeem?campaignId=8WH8J&gift_code=${giftCode}`);
 
     // Step 8: Click Redeem
-    await newPage.click('[data-testid="btn-redeem"]');
+    await page.click('[data-testid="btn-redeem"]');
 
     // Step 9: Check the page after clicking Redeem
-    await newPage.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: 'code_redeem.png' });
 
-    const alreadySubscriberElement = await newPage.$('[data-testid="already-subscriber-view"]');
+    const alreadySubscriberElement = await page.$('[data-testid="already-subscriber-view"]');
 
     if (alreadySubscriberElement) {
       console.log('Success: User is already a subscriber');
       return;
     }
 
-    const continueButton = await newPage.$('a[data-testid="get-started-btn"]');
+    const continueButton = await page.$('a[data-testid="get-started-btn"]');
     if (continueButton) {
       await continueButton.click();
       console.log('Clicked on Continue button');
     } else {
+      await page.screenshot({ path: 'error.png' });
        throw new Error('Did not find continue button');
     }
 
